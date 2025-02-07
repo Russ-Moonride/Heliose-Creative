@@ -7,9 +7,15 @@ import gspread
 
 st.set_page_config(page_title="Heliose Creative Report", layout="wide", page_icon="🔬")
 
+scope = [
+    "https://www.googleapis.com/auth/bigquery",
+    "https://www.googleapis.com/auth/cloud-platform"
+]
+
 # Set up Google Cloud credentials with correct scope
 credentials = service_account.Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"]
+    st.secrets["gcp_service_account"],
+    scopes = scope
 )
 
 
