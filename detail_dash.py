@@ -45,7 +45,7 @@ def filter_data(df, start_date, end_date):
 def load_gsheet_data():
     try:
         # Open the Google Sheet
-        spreadsheet_id = "YOUR_SPREADSHEET_ID_HERE"  # Replace with your actual ID
+        spreadsheet_id = "1-bBXJqtKJBqMwuTzuAjP_XwR35lNZQGe3iwr5plGqiU"  # Replace with your actual ID
         spreadsheet = gs_client.open_by_key(spreadsheet_id)
 
 
