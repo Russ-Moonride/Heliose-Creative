@@ -45,7 +45,9 @@ def filter_data(df, start_date, end_date):
 def load_gsheet_data():
     try:
         # Open the Google Sheet
-        spreadsheet = gs_client.open("Heliose Ad Tracking Creative Performance")  # Ensure this is the correct sheet name
+        spreadsheet_id = "YOUR_SPREADSHEET_ID_HERE"  # Replace with your actual ID
+        spreadsheet = gs_client.open_by_key(spreadsheet_id)
+
 
         # Select the first worksheet (or specify by name)
         sheet = spreadsheet.worksheet("Meta_AdName_REF")  # You can also use: spreadsheet.worksheet("Sheet Name")
