@@ -7,16 +7,21 @@ import gspread
 
 st.set_page_config(page_title="Heliose Creative Report", layout="wide", page_icon="🔬")
 
-# Set up Google Cloud credentials
+# Define proper OAuth scopes
+scope = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+# Set up Google Cloud credentials with correct scope
 credentials = service_account.Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"]
+    st.secrets["gcp_service_account"],
+    scopes=scope  # Ensures permissions for Sheets and Drive
 )
 
-# Separate BigQuery client
-bq_client = bigquery.Client(credentials=credentials)
-
-# Separate Google Sheets client
-gs_client = gspread.authorize(credentials)
+# Initialize separate clients
+bq_client = bigquery.Client(credentials=credentials)  # BigQuery
+gs_client = gspread.authorize(credentials)  # Google Sheets
 
 # Cache the data to avoid reloading on every interaction
 @st.cache_data
@@ -35,7 +40,7 @@ def filter_data(df, start_date, end_date):
 # Function to load data from Google Sheets
 @st.cache_data
 def load_gsheet_data():
-    sheet = gs_client.open("Your Google Sheet Name").sheet1  # Change as needed
+    sheet = gs_client.open("Heliose Ad Tracking Creative Performance Report").sheet8  # Change as needed
     data = sheet.get_all_records()
     return pd.DataFrame(data)
 
