@@ -45,7 +45,7 @@ def load_gsheet_data():
         spreadsheet = gs_client.open("Heliose Ad Tracking Creative Performance")  # Ensure this is the correct sheet name
 
         # Select the first worksheet (or specify by name)
-        sheet = spreadsheet.sheet1  # You can also use: spreadsheet.worksheet("Sheet Name")
+        sheet = spreadsheet.worksheet("Meta_AdName_REF")  # You can also use: spreadsheet.worksheet("Sheet Name")
 
         # Get all records
         data = sheet.get_all_records()
