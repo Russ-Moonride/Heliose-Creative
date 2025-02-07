@@ -7,16 +7,9 @@ import gspread
 
 st.set_page_config(page_title="Heliose Creative Report", layout="wide", page_icon="🔬")
 
-# Define proper OAuth scopes
-scope = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
-
 # Set up Google Cloud credentials with correct scope
 credentials = service_account.Credentials.from_service_account_info(
-    st.secrets["gcp_service_account"],
-    scopes=scope  # Ensures permissions for Sheets and Drive
+    st.secrets["gcp_service_account"]
 )
 
 
