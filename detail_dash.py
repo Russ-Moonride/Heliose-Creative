@@ -4,6 +4,7 @@ from google.cloud import bigquery
 from datetime import datetime
 from google.oauth2 import service_account
 from google.oauth2.service_account import Credentials
+import gspread
 
 
 st.set_page_config(page_title="Heliose Creative Report", layout="wide", page_icon="🔬")
