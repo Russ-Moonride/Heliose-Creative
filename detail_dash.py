@@ -98,6 +98,7 @@ def main():
     st.dataframe(filtered_df)
 
     st.divider()
+    st.write(filtered_df.columns)
 
 if __name__ == "__main__":
     main()
