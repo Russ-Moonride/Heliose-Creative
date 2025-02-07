@@ -40,7 +40,7 @@ def filter_data(df, start_date, end_date):
 # Function to load data from Google Sheets
 @st.cache_data
 def load_gsheet_data():
-    sheet = gs_client.open("Heliose Ad Tracking Creative Performance Report").sheet8  # Change as needed
+    sheet = gs_client.open("Heliose Ad Tracking Creative Performance Report").Meta_AdName_REF  # Change as needed
     data = sheet.get_all_records()
     return pd.DataFrame(data)
 
