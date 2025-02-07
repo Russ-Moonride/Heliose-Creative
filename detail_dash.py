@@ -30,10 +30,13 @@ gs_client = gspread.authorize(credentials)  # Google Sheets
 @st.cache_data
 def load_data():
     query = """
-    SELECT * 
+    SELECT 
     FROM `heliose.heliose_segments.meta_adlevel`
     """  # Replace with actual table name
     df = bq_client.query(query).to_dataframe()  # Use `bq_client` instead of `client`
+
+    df.rename(columns={"Ad_Name__Facebook_Ads" : "Ad_Name", "Ad_Set_Name__Facebook_Ads" : "Ad Set", "Campaign_Name__Facebook_Ads" : "Campaign Name", "Link_Clicks__Facebook_Ads" : "Clicks", "Impressions__Facebook_Ads" : "Impressions", "Amount_Spent__Facebook_Ads" : "Amount Spent", 
+                         "n_3_Second_Video_Views__Facebook_Ads" : "3 Sec Views", "Video_Watches_at_100__Facebook_Ads" : "Thruplays", "Leads__Facebook_Ads" : "Leads"}, inplace=True)
     return df
 
 # Function to filter data based on start and end date
@@ -69,6 +72,12 @@ def main():
     # Load BigQuery data
     df = load_data()
 
+    # Load Ref table from google sheets
+    ref_data = load_gsheet_data()
+
+    # Map variables to ad names
+    merged_data = pd.merge(data, ref_data, on="Ad_Name", how="left")  # 'left' keeps all BigQuery data
+
     # Date filters
     col1, col2 = st.columns(2)
     with col1:
@@ -82,18 +91,13 @@ def main():
         return
 
     # Filter the loaded data
-    filtered_df = filter_data(df, start_date, end_date)
+    filtered_df = filter_data(merged_data, start_date, end_date)
 
     # Display filtered data
     st.write("### BigQuery Data Preview")
     st.dataframe(filtered_df)
 
     st.divider()
-
-    # Load Google Sheets data
-    ref_data = load_gsheet_data()
-    st.write("### Google Sheets Data Preview")
-    st.dataframe(ref_data)
 
 if __name__ == "__main__":
     main()
