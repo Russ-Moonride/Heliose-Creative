@@ -70,7 +70,7 @@ def main():
     st.title("BigQuery & Google Sheets Data Dashboard")
 
     # Load BigQuery data
-    df = load_data()
+    data = load_data()
 
     # Load Ref table from google sheets
     ref_data = load_gsheet_data()
