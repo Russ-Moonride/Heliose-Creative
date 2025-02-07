@@ -30,7 +30,7 @@ gs_client = gspread.authorize(credentials)  # Google Sheets
 @st.cache_data
 def load_data():
     query = """
-    SELECT 
+    SELECT *
     FROM `heliose.heliose_segments.meta_adlevel`
     """  # Replace with actual table name
     df = bq_client.query(query).to_dataframe()  # Use `bq_client` instead of `client`
