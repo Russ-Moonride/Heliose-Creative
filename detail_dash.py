@@ -1,0 +1,49 @@
+import streamlit as st
+import pandas as pd
+from google.cloud import bigquery
+from datetime import datetime
+
+# Cache the data to avoid reloading on every interaction
+@st.cache_data
+def load_data():
+    client = bigquery.Client()  # Ensure authentication is set up
+    query = """
+    SELECT * 
+    FROM `heliose.heliose_segments.meta_adlevel`
+    """  # Replace with actual table name
+    df = client.query(query).to_dataframe()
+    return df
+
+# Function to filter data based on start and end date
+def filter_data(df, start_date, end_date):
+    df["timestamp_column"] = pd.to_datetime(df["timestamp_column"])  # Adjust to match your date column
+    return df[(df["timestamp_column"] >= start_date) & (df["timestamp_column"] <= end_date)]
+
+# Streamlit app
+def main():
+    st.title("BigQuery Data Dashboard")
+
+    # Load data once at the beginning
+    df = load_data()
+
+    # Date filters
+    col1, col2 = st.columns(2)
+    with col1:
+        start_date = st.date_input("Start Date", datetime.today())
+    with col2:
+        end_date = st.date_input("End Date", datetime.today())
+
+    # Ensure valid date selection
+    if start_date > end_date:
+        st.error("End date must be after start date.")
+        return
+
+    # Filter the loaded data
+    filtered_df = filter_data(df, start_date, end_date)
+
+    # Display filtered data
+    st.write("### Data Preview")
+    st.dataframe(filtered_df)
+
+if __name__ == "__main__":
+    main()
