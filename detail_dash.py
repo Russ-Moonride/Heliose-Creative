@@ -40,9 +40,22 @@ def filter_data(df, start_date, end_date):
 # Function to load data from Google Sheets
 @st.cache_data
 def load_gsheet_data():
-    sheet = gs_client.open("Meta_AdName_REF")  # Change as needed
-    data = sheet.get_all_records()
-    return pd.DataFrame(data)
+    try:
+        # Open the Google Sheet
+        spreadsheet = gs_client.open("Heliose Ad Tracking Creative Performance")  # Ensure this is the correct sheet name
+
+        # Select the first worksheet (or specify by name)
+        sheet = spreadsheet.sheet1  # You can also use: spreadsheet.worksheet("Sheet Name")
+
+        # Get all records
+        data = sheet.get_all_records()
+
+        # Convert to DataFrame
+        return pd.DataFrame(data)
+
+    except Exception as e:
+        st.error(f"Error loading Google Sheets data: {e}")
+        return pd.DataFrame()  # Return an empty dataframe on failure
 
 # Streamlit app
 def main():
