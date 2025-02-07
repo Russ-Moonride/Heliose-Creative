@@ -105,11 +105,11 @@ def main():
     
     if selected_vars:
         # Group data dynamically based on selection
-        #grouped_data = data.groupby(selected_vars).agg({"Clicks": "sum"}).reset_index()
+        grouped_data = merged_data.groupby(selected_vars).agg({"Clicks": "sum"}).reset_index()
     
         # Display results
         st.write("### Breakdown by Selected Variables")
-        st.dataframe(merged_data)
+        st.dataframe(grouped_data)
     else:
         st.write("Please select at least one variable to break down by.")
 
