@@ -19,6 +19,8 @@ credentials = service_account.Credentials.from_service_account_info(
     scopes=scope  # Ensures permissions for Sheets and Drive
 )
 
+
+
 # Initialize separate clients
 bq_client = bigquery.Client(credentials=credentials)  # BigQuery
 gs_client = gspread.authorize(credentials)  # Google Sheets
