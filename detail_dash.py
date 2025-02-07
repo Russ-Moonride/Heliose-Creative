@@ -3,6 +3,8 @@ import pandas as pd
 from google.cloud import bigquery
 from datetime import datetime
 from google.oauth2 import service_account
+from google.oauth2.service_account import Credentials
+
 
 st.set_page_config(page_title="Heliose Creative Report", layout="wide", page_icon="🔬")
 
@@ -10,7 +12,6 @@ credentials = service_account.Credentials.from_service_account_info(
           st.secrets["gcp_service_account"]
       )
 
-Account = "Freedom Solar"
 client = bigquery.Client(credentials=credentials)
 
 # Cache the data to avoid reloading on every interaction
@@ -27,6 +28,17 @@ def load_data():
 def filter_data(df, start_date, end_date):
     #df["Date"] = pd.to_datetime(df["Date"])  # Adjust to match your date column
     return df[(df["Date"] >= start_date) & (df["Date"] <= end_date)]
+
+# Set up Google Sheets API credentials
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+client = gspread.authorize(credentials)
+
+# Function to load data from Google Sheets
+@st.cache_data
+def load_gsheet_data():
+    sheet = client.open("Your Google Sheet Name").sheet1  # Change as needed
+    data = sheet.get_all_records()
+    return pd.DataFrame(data)
 
 # Streamlit app
 def main():
@@ -53,6 +65,10 @@ def main():
     # Display filtered data
     st.write("### Data Preview")
     st.dataframe(filtered_df)
+
+    st.divider()
+    ref_data = load_gsheet_data()
+    st.dataframe(ref_data)
 
 if __name__ == "__main__":
     main()
