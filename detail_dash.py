@@ -23,8 +23,8 @@ def load_data():
 
 # Function to filter data based on start and end date
 def filter_data(df, start_date, end_date):
-    df["date"] = pd.to_datetime(df["date"])  # Adjust to match your date column
-    return df[(df["date"] >= start_date) & (df["date"] <= end_date)]
+    df["Date"] = pd.to_datetime(df["Date"])  # Adjust to match your date column
+    return df[(df["Date"] >= start_date) & (df["Date"] <= end_date)]
 
 # Streamlit app
 def main():
