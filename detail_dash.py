@@ -114,7 +114,6 @@ def main():
         st.write("Please select at least one variable to break down by.")
 
     st.divider()
-    st.write(filtered_df.columns)
 
 if __name__ == "__main__":
     main()
