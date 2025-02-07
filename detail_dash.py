@@ -3,17 +3,20 @@ import pandas as pd
 from google.cloud import bigquery
 from datetime import datetime
 from google.oauth2 import service_account
-from google.oauth2.service_account import Credentials
 import gspread
-
 
 st.set_page_config(page_title="Heliose Creative Report", layout="wide", page_icon="🔬")
 
+# Set up Google Cloud credentials
 credentials = service_account.Credentials.from_service_account_info(
-          st.secrets["gcp_service_account"]
-      )
+    st.secrets["gcp_service_account"]
+)
 
-client = bigquery.Client(credentials=credentials)
+# Separate BigQuery client
+bq_client = bigquery.Client(credentials=credentials)
+
+# Separate Google Sheets client
+gs_client = gspread.authorize(credentials)
 
 # Cache the data to avoid reloading on every interaction
 @st.cache_data
@@ -22,30 +25,25 @@ def load_data():
     SELECT * 
     FROM `heliose.heliose_segments.meta_adlevel`
     """  # Replace with actual table name
-    df = client.query(query).to_dataframe()
+    df = bq_client.query(query).to_dataframe()  # Use `bq_client` instead of `client`
     return df
 
 # Function to filter data based on start and end date
 def filter_data(df, start_date, end_date):
-    #df["Date"] = pd.to_datetime(df["Date"])  # Adjust to match your date column
     return df[(df["Date"] >= start_date) & (df["Date"] <= end_date)]
-
-# Set up Google Sheets API credentials
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-client = gspread.authorize(credentials)
 
 # Function to load data from Google Sheets
 @st.cache_data
 def load_gsheet_data():
-    sheet = client.open("Your Google Sheet Name").sheet1  # Change as needed
+    sheet = gs_client.open("Your Google Sheet Name").sheet1  # Change as needed
     data = sheet.get_all_records()
     return pd.DataFrame(data)
 
 # Streamlit app
 def main():
-    st.title("BigQuery Data Dashboard")
+    st.title("BigQuery & Google Sheets Data Dashboard")
 
-    # Load data once at the beginning
+    # Load BigQuery data
     df = load_data()
 
     # Date filters
@@ -64,11 +62,14 @@ def main():
     filtered_df = filter_data(df, start_date, end_date)
 
     # Display filtered data
-    st.write("### Data Preview")
+    st.write("### BigQuery Data Preview")
     st.dataframe(filtered_df)
 
     st.divider()
+
+    # Load Google Sheets data
     ref_data = load_gsheet_data()
+    st.write("### Google Sheets Data Preview")
     st.dataframe(ref_data)
 
 if __name__ == "__main__":
