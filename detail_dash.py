@@ -3,10 +3,16 @@ import pandas as pd
 from google.cloud import bigquery
 from datetime import datetime
 
+credentials = service_account.Credentials.from_service_account_info(
+          st.secrets["gcp_service_account"]
+      )
+
+Account = "Freedom Solar"
+client = bigquery.Client(credentials=credentials)
+
 # Cache the data to avoid reloading on every interaction
 @st.cache_data
 def load_data():
-    client = bigquery.Client()  # Ensure authentication is set up
     query = """
     SELECT * 
     FROM `heliose.heliose_segments.meta_adlevel`
