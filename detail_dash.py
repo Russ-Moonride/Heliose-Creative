@@ -76,7 +76,7 @@ def main():
     ref_data = load_gsheet_data()
 
     # Map variables to ad names
-    merged_data = pd.merge(data, ref_data, on="Ad_Name", how="left")  # 'left' keeps all BigQuery data
+    merged_data = pd.merge(data, ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
 
     # Date filters
     col1, col2 = st.columns(2)
