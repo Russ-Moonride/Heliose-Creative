@@ -9,7 +9,9 @@ st.set_page_config(page_title="Heliose Creative Report", layout="wide", page_ico
 
 scope = [
     "https://www.googleapis.com/auth/bigquery",
-    "https://www.googleapis.com/auth/cloud-platform"
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
 ]
 
 # Set up Google Cloud credentials with correct scope
