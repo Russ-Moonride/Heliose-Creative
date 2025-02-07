@@ -94,8 +94,24 @@ def main():
     filtered_df = filter_data(merged_data, start_date, end_date)
 
     # Display filtered data
-    st.write("### BigQuery Data Preview")
-    st.dataframe(filtered_df)
+    st.write("### Creative Detail")
+    # List of categorical variables to choose from
+    categorical_vars = ["Batch", "Medium", "Hook", "Secondary Message", "Primary Imagery Style", "Secondary Imagery Style", "Copy Style", "Aesthetic", "Concept Description", "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"]
+    
+    st.title("Dynamic Breakdown Dashboard")
+    
+    # User selects the breakdown order
+    selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Batch", "Medium"])
+    
+    if selected_vars:
+        # Group data dynamically based on selection
+        grouped_data = data.groupby(selected_vars).agg({"Clicks": "sum"}).reset_index()
+    
+        # Display results
+        st.write("### Breakdown by Selected Variables")
+        st.dataframe(grouped_data)
+    else:
+        st.write("Please select at least one variable to break down by.")
 
     st.divider()
     st.write(filtered_df.columns)
