@@ -106,7 +106,16 @@ def main():
     if selected_vars:
         # Group data dynamically based on selection
         grouped_data = merged_data.groupby(selected_vars).agg({"Clicks": "sum", "Impressions": "sum", "Cost" : "sum", "3 Sec Views" : "sum", "Thruplays" : "sum", "Leads" : "sum"}).reset_index()
-    
+
+        # Make the columns we need
+        grouped_data["CTR"] = round(grouped_data["Clicks"]/grouped_data["Impressions"], 2)
+        grouped_data["CPC"] = round(grouped_data["Cost"] / grouped_data["Clicks"], 2)
+        grouped_data["CPM"] = round((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000, 2)
+        grouped_data["3 Sec View Rate"] = round(grouped_data["3 Sec Views"] / grouped_data["Impressions"], 2)
+        grouped_data["Vid Complete Rate"] = round(grouped_data["Thruplays"] / grouped_data["Impressions"], 2)
+        grouped_data["CPL"] = round(grouped_data["Cost"] / grouped_data["Leads"], 2)
+        grouped_data["CVR (Click)"] = round(grouped_data["Leads"] / grouped_data["Clicks"], 2)
+        
         # Display results
         st.write("### Breakdown by Selected Variables")
         st.dataframe(grouped_data)
