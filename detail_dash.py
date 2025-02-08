@@ -67,7 +67,7 @@ def load_gsheet_data():
 
 # Streamlit app
 def main():
-    st.title("BigQuery & Google Sheets Data Dashboard")
+    st.title("Heliose Creative Report")
 
     # Load BigQuery data
     data = load_data()
@@ -94,11 +94,9 @@ def main():
     filtered_df = filter_data(merged_data, start_date, end_date)
 
     # Display filtered data
-    st.write("### Creative Detail")
+    st.write("### Creative Detail Breakdown")
     # List of categorical variables to choose from
     categorical_vars = ["Batch", "Medium", "Hook", "Secondary Message", "Primary Imagery Style", "Secondary Imagery Style", "Copy Style", "Aesthetic", "Concept Description", "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"]
-    
-    st.title("Dynamic Breakdown Dashboard")
     
     # User selects the breakdown order
     selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Batch", "Medium"])
