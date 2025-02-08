@@ -121,7 +121,7 @@ def main():
         # Display results
         st.write("### Breakdown by Selected Variables")
         st.dataframe(grouped_data, use_container_width=True)
-)
+
     else:
         st.write("Please select at least one variable to break down by.")
 
