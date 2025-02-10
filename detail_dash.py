@@ -111,7 +111,7 @@ def main():
     ref_data, camp_data = load_meta_gsheet_data()
 
     # Map variables to ad names
-    merged_data = pd.merge(data, ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
+    merged_data = pd.merge(meta_data, ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
     merged_data = pd.merge(merged_data, camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
 
     ### Add Campaign Type filter
