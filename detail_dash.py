@@ -89,6 +89,8 @@ def main():
     # Load Ref table from google sheets
     ref_data, camp_data = load_meta_gsheet_data()
 
+    st.write(camp_data)
+
     # Map variables to ad names
     merged_data = pd.merge(data, ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
     merged_data = pd.merge(merged_data, camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
