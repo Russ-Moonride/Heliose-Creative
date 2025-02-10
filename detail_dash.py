@@ -93,7 +93,7 @@ def main():
     # Date filters
     col1, col2 = st.columns(2)
     with col1:
-        start_date = st.date_input("Start Date", datetime.today())
+        start_date = st.date_input("Start Date", datetime.yesterday())
     with col2:
         end_date = st.date_input("End Date", datetime.today())
 
@@ -115,7 +115,7 @@ def main():
     
     if selected_vars:
         # Group data dynamically based on selection
-        grouped_data = merged_data.groupby(selected_vars).agg({"Clicks": "sum", "Impressions": "sum", "Cost" : "sum", "3 Sec Views" : "sum", "Thruplays" : "sum", "Leads" : "sum"}).reset_index()
+        grouped_data = filtered_df.groupby(selected_vars).agg({"Clicks": "sum", "Impressions": "sum", "Cost" : "sum", "3 Sec Views" : "sum", "Thruplays" : "sum", "Leads" : "sum"}).reset_index()
 
         # Make the columns we need
         grouped_data["CTR"] = round(grouped_data["Clicks"]/grouped_data["Impressions"], 4).apply(format_percentage)
