@@ -20,8 +20,6 @@ credentials = service_account.Credentials.from_service_account_info(
     scopes = scope
 )
 
-
-
 # Initialize separate clients
 bq_client = bigquery.Client(credentials=credentials)  # BigQuery
 gs_client = gspread.authorize(credentials)  # Google Sheets
@@ -65,6 +63,20 @@ def load_gsheet_data():
         st.error(f"Error loading Google Sheets data: {e}")
         return pd.DataFrame()  # Return an empty dataframe on failure
 
+def format_percentage(value):
+
+    if pd.isna(value):  # Handle NaN values
+        return "N/A"
+    return f"{value:.1%}"  # Converts 0.25 to '25.0%'
+
+
+def format_dollar(value):
+
+    if pd.isna(value):  # Handle NaN values
+        return "N/A"
+    return f"${value:,.2f}"  # Converts 1234.56 to '$1,234.56'
+
+
 # Streamlit app
 def main():
     st.title("Heliose Creative Report")
@@ -106,13 +118,15 @@ def main():
         grouped_data = merged_data.groupby(selected_vars).agg({"Clicks": "sum", "Impressions": "sum", "Cost" : "sum", "3 Sec Views" : "sum", "Thruplays" : "sum", "Leads" : "sum"}).reset_index()
 
         # Make the columns we need
-        grouped_data["CTR"] = round(grouped_data["Clicks"]/grouped_data["Impressions"], 2)
+        grouped_data["CTR"] = round(grouped_data["Clicks"]/grouped_data["Impressions"], 4).apply(format_percentage)
         grouped_data["CPC"] = round(grouped_data["Cost"] / grouped_data["Clicks"], 2)
         grouped_data["CPM"] = round((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000, 2)
         grouped_data["3 Sec View Rate"] = round(grouped_data["3 Sec Views"] / grouped_data["Impressions"], 2)
         grouped_data["Vid Complete Rate"] = round(grouped_data["Thruplays"] / grouped_data["Impressions"], 2)
         grouped_data["CPL"] = round(grouped_data["Cost"] / grouped_data["Leads"], 2)
         grouped_data["CVR (Click)"] = round(grouped_data["Leads"] / grouped_data["Clicks"], 2)
+
+        
 
         # Organize cols
         metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM", "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate", "Leads", "CPL", "CVR (Click)"]
