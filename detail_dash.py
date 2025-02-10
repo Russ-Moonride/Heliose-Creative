@@ -119,12 +119,12 @@ def main():
 
         # Make the columns we need
         grouped_data["CTR"] = round(grouped_data["Clicks"]/grouped_data["Impressions"], 4).apply(format_percentage)
-        grouped_data["CPC"] = round(grouped_data["Cost"] / grouped_data["Clicks"], 2)
-        grouped_data["CPM"] = round((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000, 2)
-        grouped_data["3 Sec View Rate"] = round(grouped_data["3 Sec Views"] / grouped_data["Impressions"], 2)
-        grouped_data["Vid Complete Rate"] = round(grouped_data["Thruplays"] / grouped_data["Impressions"], 2)
-        grouped_data["CPL"] = round(grouped_data["Cost"] / grouped_data["Leads"], 2)
-        grouped_data["CVR (Click)"] = round(grouped_data["Leads"] / grouped_data["Clicks"], 2)
+        grouped_data["CPC"] = round(grouped_data["Cost"] / grouped_data["Clicks"], 2).apply(format_dollar)
+        grouped_data["CPM"] = round((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000, 2).apply(format_dollar)
+        grouped_data["3 Sec View Rate"] = round(grouped_data["3 Sec Views"] / grouped_data["Impressions"], 2).apply(format_percentage)
+        grouped_data["Vid Complete Rate"] = round(grouped_data["Thruplays"] / grouped_data["Impressions"], 2).apply(format_percentage)
+        grouped_data["CPL"] = round(grouped_data["Cost"] / grouped_data["Leads"], 2).apply(format_dollar)
+        grouped_data["CVR (Click)"] = round(grouped_data["Leads"] / grouped_data["Clicks"], 2).apply(format_percentage)
 
         
 
