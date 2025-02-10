@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from google.cloud import bigquery
-from datetime import datetime
+from datetime import datetime, timedelta
 from google.oauth2 import service_account
 import gspread
 
