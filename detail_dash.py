@@ -83,6 +83,11 @@ def format_dollar(value):
 def main():
     st.title("Heliose Creative Report")
 
+    # Platform selection at the top of the dashboard
+    platform_selection = st.radio("Select Platform:", ["YouTube", "Facebook"], index=1)
+
+    st.divider()
+
     # Load BigQuery data
     data = load_data()
 
