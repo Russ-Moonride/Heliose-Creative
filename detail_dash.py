@@ -98,7 +98,7 @@ def main():
     type_options = ["All"] + sorted(merged_data["Type"].dropna().unique().tolist()) + ["Unmapped"]
     
     # User selection for "Type"
-    selected_type = st.selectbox("Select Type:", type_options, index=0)
+    selected_type = st.selectbox("Select Campaign Type:", type_options, index=0)
     
     # Apply filter if "All" is not selected
     if selected_type == "Unmapped":
