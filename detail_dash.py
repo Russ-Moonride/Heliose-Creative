@@ -88,8 +88,8 @@ def load_youtube_gsheet_data():
 
 
         # Select the first worksheet (or specify by name)
-        var_sheet = spreadsheet.worksheet("Youtube_AdName_REF")  
-        camp_sheet = spreadsheet.worksheet("Youtube_Campaign_Name_REF")
+        var_sheet = spreadsheet.worksheet("YouTube_AdName_REF")  
+        camp_sheet = spreadsheet.worksheet("YouTube_Campaign_Name_REF")
         
         # Get all records
         var_data = pd.DataFrame(var_sheet.get_all_records())
