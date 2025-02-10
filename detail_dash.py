@@ -45,7 +45,7 @@ def load_youtube_data():
     """  # Replace with actual table name
     df = bq_client.query(query).to_dataframe()  # Use `bq_client` instead of `client`
 
-    df.rename(columns={"Ad_Name__Google_Ads" : "Ad Name", "Campaign__Google_Ads" : "Campaign Name", "Clicks__Google_Ads" : "Clicks", "Impressions__Google_Ads" : "Impressions", "Cost__Google_Ads" : "Cost", 
+    df.rename(columns={"Ad_Name__Google_Ads" : "Ad Name", "Campaign__Google_Ads" : "Campaign", "Clicks__Google_Ads" : "Clicks", "Impressions__Google_Ads" : "Impressions", "Cost__Google_Ads" : "Cost", 
                          "Views__Google_Ads" : "Views", "Views_100__Google_Ads" : "Thruplays", "Conversions__Google_Ads" : "Conversions"}, inplace=True)
     return df
 
