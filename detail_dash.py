@@ -191,11 +191,16 @@ def main():
             grouped_data["CPL"] = round(grouped_data["Cost"] / grouped_data["Leads"], 2).apply(format_dollar)
             grouped_data["CVR (Click)"] = round(grouped_data["Leads"] / grouped_data["Clicks"], 2).apply(format_percentage)
     
-            
-    
             # Organize cols
             metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM", "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate", "Leads", "CPL", "CVR (Click)"]
             grouped_data = grouped_data[selected_vars + metric_order]
+            
+            # Display results
+            st.write("### Breakdown by Selected Variables")
+            st.dataframe(grouped_data, use_container_width=True)
+    
+        else:
+            st.write("Please select at least one variable to break down by.")
 
     else:
         # Display filtered data
@@ -222,14 +227,13 @@ def main():
             # Organize cols
             metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM", "Views", "View Rate", "Conversions", "CPA", "CVR (Click)"]
             grouped_data = grouped_data[selected_vars + metric_order]
-
     
-    # Display results
-    st.write("### Breakdown by Selected Variables")
-    st.dataframe(grouped_data, use_container_width=True)
-
-    else:
-        st.write("Please select at least one variable to break down by.")
+            # Display results
+            st.write("### Breakdown by Selected Variables")
+            st.dataframe(grouped_data, use_container_width=True)
+    
+        else:
+            st.write("Please select at least one variable to break down by.")
 
     st.divider()
 
