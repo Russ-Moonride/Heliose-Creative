@@ -78,6 +78,31 @@ def load_meta_gsheet_data():
         st.error(f"Error loading Google Sheets data: {e}")
         return pd.DataFrame()  # Return an empty dataframe on failure
 
+# Function to load data from Google Sheets
+@st.cache_data
+def load_meta_gsheet_data():
+    try:
+        # Open the Google Sheet
+        spreadsheet_id = "1-bBXJqtKJBqMwuTzuAjP_XwR35lNZQGe3iwr5plGqiU"  # Replace with your actual ID
+        spreadsheet = gs_client.open_by_key(spreadsheet_id)
+
+
+        # Select the first worksheet (or specify by name)
+        var_sheet = spreadsheet.worksheet("Meta_AdName_REF")  
+        camp_sheet = spreadsheet.worksheet("Meta_Campaign_Name_REF")
+        
+        # Get all records
+        var_data = pd.DataFrame(var_sheet.get_all_records())
+        camp_data = pd.DataFrame(camp_sheet.get_all_records())
+
+        # Convert to DataFrame
+        return var_data, camp_data
+
+    except Exception as e:
+        st.error(f"Error loading Google Sheets data: {e}")
+        return pd.DataFrame()  # Return an empty dataframe on failure
+
+
 def format_percentage(value):
 
     if pd.isna(value):  # Handle NaN values
@@ -108,11 +133,11 @@ def main():
     youtube_data = load_youtube_data()
     
     # Load Ref table from google sheets
-    ref_data, camp_data = load_meta_gsheet_data()
+    meta_ref_data, meta_camp_data = load_meta_gsheet_data()
 
     # Map variables to ad names
-    merged_data = pd.merge(meta_data, ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
-    merged_data = pd.merge(merged_data, camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
+    merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
+    merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
 
     ### Add Campaign Type filter
     # Get unique values in "Type" column, including "All" and "Unmapped" for NaN values
