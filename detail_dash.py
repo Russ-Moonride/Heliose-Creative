@@ -176,7 +176,7 @@ def main():
         categorical_vars = ["Ad Name", "Batch", "Medium", "Hook", "Secondary Message", "Primary Imagery Style", "Secondary Imagery Style", "Copy Style", "Aesthetic", "Concept Description", "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"]
         
         # User selects the breakdown order
-        selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Batch", "Medium"])
+        selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Hook"])
         
         if selected_vars:
             # Group data dynamically based on selection
@@ -209,7 +209,7 @@ def main():
         categorical_vars = ["Ad Name", "Batch", "Medium", "Hook", "Secondary Message", "Primary Imagery Style", "Secondary Imagery Style", "Copy Style", "Aesthetic", "Concept Description", "Video Duration", "Video Close Message"]
         
         # User selects the breakdown order
-        selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Batch", "Medium"])
+        selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Hook"])
         
         if selected_vars:
             # Group data dynamically based on selection
