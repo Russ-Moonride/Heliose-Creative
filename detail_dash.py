@@ -43,7 +43,7 @@ def filter_data(df, start_date, end_date):
 
 # Function to load data from Google Sheets
 @st.cache_data
-def load_gsheet_data():
+def load_meta_gsheet_data():
     try:
         # Open the Google Sheet
         spreadsheet_id = "1-bBXJqtKJBqMwuTzuAjP_XwR35lNZQGe3iwr5plGqiU"  # Replace with your actual ID
@@ -51,13 +51,15 @@ def load_gsheet_data():
 
 
         # Select the first worksheet (or specify by name)
-        sheet = spreadsheet.worksheet("Meta_AdName_REF")  # You can also use: spreadsheet.worksheet("Sheet Name")
-
+        var_sheet = spreadsheet.worksheet("Meta_AdName_REF")  
+        camp_sheet = spreadsheet.worksheet("Meta_Campaign_Name_REF")
+        
         # Get all records
-        data = sheet.get_all_records()
+        var_data = pd.DataFrame(var_sheet.get_all_records())
+        camp_data = pd.DataFrame(camp_sheet.get_all_records())
 
         # Convert to DataFrame
-        return pd.DataFrame(data)
+        return var_data, camp_data
 
     except Exception as e:
         st.error(f"Error loading Google Sheets data: {e}")
@@ -85,11 +87,12 @@ def main():
     data = load_data()
 
     # Load Ref table from google sheets
-    ref_data = load_gsheet_data()
+    ref_data, camp_data = load_meta_gsheet_data()
 
     # Map variables to ad names
     merged_data = pd.merge(data, ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
-
+    merged_data = pd.merge(merged_data, camp_data, on="Campaign", how="left")  # 'left' keeps all BigQuery data
+    
     # Date filters
     col1, col2 = st.columns(2)
     with col1:
