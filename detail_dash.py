@@ -26,7 +26,7 @@ gs_client = gspread.authorize(credentials)  # Google Sheets
 
 # Cache the data to avoid reloading on every interaction
 @st.cache_data
-def load_data():
+def load_meta_data():
     query = """
     SELECT *
     FROM `heliose.heliose_segments.meta_adlevel`
@@ -36,6 +36,19 @@ def load_data():
     df.rename(columns={"Ad_Name__Facebook_Ads" : "Ad Name", "Ad_Set_Name__Facebook_Ads" : "Ad Set", "Campaign_Name__Facebook_Ads" : "Campaign Name", "Link_Clicks__Facebook_Ads" : "Clicks", "Impressions__Facebook_Ads" : "Impressions", "Amount_Spent__Facebook_Ads" : "Cost", 
                          "n_3_Second_Video_Views__Facebook_Ads" : "3 Sec Views", "Video_Watches_at_100__Facebook_Ads" : "Thruplays", "Leads__Facebook_Ads" : "Leads"}, inplace=True)
     return df
+
+@st.cache_data
+def load_youtube_data():
+    query = """
+    SELECT *
+    FROM `heliose.heliose_segments.youtube_adlevel`
+    """  # Replace with actual table name
+    df = bq_client.query(query).to_dataframe()  # Use `bq_client` instead of `client`
+
+    df.rename(columns={"Ad_Name__Google_Ads" : "Ad Name", "Campaign__Google_Ads" : "Campaign Name", "Clicks__Google_Ads" : "Clicks", "Impressions__Google_Ads" : "Impressions", "Cost__Google_Ads" : "Cost", 
+                         "Views__Google_Ads" : "Views", "Views_100__Google_Ads" : "Thruplays", "Conversions__Google_Ads" : "Conversions"}, inplace=True)
+    return df
+
 
 # Function to filter data based on start and end date
 def filter_data(df, start_date, end_date):
@@ -89,8 +102,11 @@ def main():
     st.divider()
 
     # Load BigQuery data
-    data = load_data()
+    meta_data = load_meta_data()
 
+    # Load BigQuery data
+    youtube_data = load_youtube_data()
+    
     # Load Ref table from google sheets
     ref_data, camp_data = load_meta_gsheet_data()
 
