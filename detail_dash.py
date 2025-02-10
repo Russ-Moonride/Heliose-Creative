@@ -80,7 +80,7 @@ def load_meta_gsheet_data():
 
 # Function to load data from Google Sheets
 @st.cache_data
-def load_meta_gsheet_data():
+def load_youtube_gsheet_data():
     try:
         # Open the Google Sheet
         spreadsheet_id = "1-bBXJqtKJBqMwuTzuAjP_XwR35lNZQGe3iwr5plGqiU"  # Replace with your actual ID
@@ -88,8 +88,8 @@ def load_meta_gsheet_data():
 
 
         # Select the first worksheet (or specify by name)
-        var_sheet = spreadsheet.worksheet("Meta_AdName_REF")  
-        camp_sheet = spreadsheet.worksheet("Meta_Campaign_Name_REF")
+        var_sheet = spreadsheet.worksheet("Youtube_AdName_REF")  
+        camp_sheet = spreadsheet.worksheet("Youtube_Campaign_Name_REF")
         
         # Get all records
         var_data = pd.DataFrame(var_sheet.get_all_records())
@@ -126,14 +126,13 @@ def main():
 
     st.divider()
 
-    # Load BigQuery data
+    # Load Meta data
     meta_data = load_meta_data()
+    meta_ref_data, meta_camp_data = load_meta_gsheet_data()
 
     # Load BigQuery data
     youtube_data = load_youtube_data()
-    
-    # Load Ref table from google sheets
-    meta_ref_data, meta_camp_data = load_meta_gsheet_data()
+    youtube_ref_data, youtube_camp_data = load_youtube_gsheet_data()
 
     # Map variables to ad names
     merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
