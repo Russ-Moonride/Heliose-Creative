@@ -136,7 +136,7 @@ def main():
 
     if platform_selection == "YouTube":
         merged_data = pd.merge(youtube_data, youtube_ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
-        merged_data = pd.merge(merged_data, youtube_camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
+        merged_data = pd.merge(merged_data, youtube_camp_data, on="Campaign", how="left")  # 'left' keeps all BigQuery data
     else:
         merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
         merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
