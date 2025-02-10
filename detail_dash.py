@@ -89,11 +89,19 @@ def main():
     # Load Ref table from google sheets
     ref_data, camp_data = load_meta_gsheet_data()
 
-    st.write(camp_data)
-
     # Map variables to ad names
     merged_data = pd.merge(data, ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
     merged_data = pd.merge(merged_data, camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
+
+    # Get unique values in "Type" column, including an "All" option
+    type_options = ["All"] + sorted(merged_data["Type"].dropna().unique().tolist())
+    
+    # User selection for "Type"
+    selected_type = st.selectbox("Select Type:", type_options, index=0)
+    
+    # Apply filter if "All" is not selected
+    if selected_type != "All":
+        merged_data = merged_data[merged_data["Type"] == selected_type]
     
     # Date filters
     col1, col2 = st.columns(2)
