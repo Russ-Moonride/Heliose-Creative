@@ -249,28 +249,52 @@ def main():
     else:
         st.write("Please select at least one variable to break down by.")
 
-    # **📌 Additional breakdowns for all categorical variables**
-    st.write("### All Variable Breakdowns")
+    if platform_selection == "Meta":
+        # **📌 Additional breakdowns for all categorical variables**
+        st.write("### All Variable Breakdowns")
+    
+        for var in all_categorical_vars:
+            st.write(f"#### Breakdown by {var}")
+    
+            single_var_grouped = filtered_df.groupby(var).agg({col: "sum" for col in metric_cols}).reset_index()
+    
+            # Generate calculated columns
+            single_var_grouped["CTR"] = (single_var_grouped["Clicks"] / single_var_grouped["Impressions"]).apply(format_percentage)
+            single_var_grouped["CPC"] = (single_var_grouped["Cost"] / single_var_grouped["Clicks"]).apply(format_dollar)
+            single_var_grouped["CPM"] = ((single_var_grouped["Cost"] / single_var_grouped["Impressions"]) * 1000).apply(format_dollar)
+            single_var_grouped["3 Sec View Rate"] = (single_var_grouped["3 Sec Views"] / single_var_grouped["Impressions"]).apply(format_percentage)
+            single_var_grouped["CPL"] = (single_var_grouped["Cost"] / single_var_grouped["Leads"]).apply(format_dollar)
+            single_var_grouped["CVR (Click)"] = (single_var_grouped["Leads"] / single_var_grouped["Clicks"]).apply(format_percentage
 
-    for var in all_categorical_vars:
-        st.divider()
-        st.write(f"#### Breakdown by {var}")
+            single_var_grouped = single_var_grouped[[var] + metric_order]
+    
+            st.dataframe(single_var_grouped, use_container_width=True)
 
-        single_var_grouped = filtered_df.groupby(var).agg({col: "sum" for col in metric_cols}).reset_index()
+            st.divider()
 
-        # Generate calculated columns
-        single_var_grouped["CTR"] = (single_var_grouped["Clicks"] / single_var_grouped["Impressions"]).apply(format_percentage)
-        single_var_grouped["CPC"] = (single_var_grouped["Cost"] / single_var_grouped["Clicks"]).apply(format_dollar)
-        single_var_grouped["CPM"] = ((single_var_grouped["Cost"] / single_var_grouped["Impressions"]) * 1000).apply(format_dollar)
-        single_var_grouped["View Rate"] = (single_var_grouped["Views"] / single_var_grouped["Impressions"]).apply(format_percentage)
-        single_var_grouped["CPA"] = (single_var_grouped["Cost"] / single_var_grouped["Conversions"]).apply(format_dollar)
-        single_var_grouped["CVR (Click)"] = (single_var_grouped["Conversions"] / single_var_grouped["Clicks"]).apply(format_percentage)
+    else:
+        # **📌 Additional breakdowns for all categorical variables**
+        st.write("### All Variable Breakdowns")
+    
+        for var in all_categorical_vars:
+            st.write(f"#### Breakdown by {var}")
+    
+            single_var_grouped = filtered_df.groupby(var).agg({col: "sum" for col in metric_cols}).reset_index()
+    
+            # Generate calculated columns
+            single_var_grouped["CTR"] = (single_var_grouped["Clicks"] / single_var_grouped["Impressions"]).apply(format_percentage)
+            single_var_grouped["CPC"] = (single_var_grouped["Cost"] / single_var_grouped["Clicks"]).apply(format_dollar)
+            single_var_grouped["CPM"] = ((single_var_grouped["Cost"] / single_var_grouped["Impressions"]) * 1000).apply(format_dollar)
+            single_var_grouped["View Rate"] = (single_var_grouped["Views"] / single_var_grouped["Impressions"]).apply(format_percentage)
+            single_var_grouped["CPA"] = (single_var_grouped["Cost"] / single_var_grouped["Conversions"]).apply(format_dollar)
+            single_var_grouped["CVR (Click)"] = (single_var_grouped["Conversions"] / single_var_grouped["Clicks"]).apply(format_percentage)
+    
+            single_var_grouped = single_var_grouped[[var] + metric_order]
+    
+            st.dataframe(single_var_grouped, use_container_width=True)
 
-        single_var_grouped = single_var_grouped[[var] + metric_order]
+            st.divider()
 
-        st.dataframe(single_var_grouped, use_container_width=True)
-
-    st.divider()
 
 if __name__ == "__main__":
     main()
