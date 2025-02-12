@@ -116,7 +116,6 @@ def format_dollar(value):
         return "N/A"
     return f"${value:,.2f}"  # Converts 1234.56 to '$1,234.56'
 
-
 # Streamlit app
 def main():
     st.title("Winchoice Creative Report")
@@ -153,7 +152,7 @@ def main():
     # **Apply date filtering**
     filtered_df = filter_data(merged_data, start_date, end_date)
 
-    # **Define categorical variables**
+    # **Define all categorical variables**
     all_categorical_vars = [
         "Ad Name", "Batch", "Medium", "Hook", "Secondary Message",
         "Primary Imagery Style", "Secondary Imagery Style", "Background Brightness",
@@ -219,34 +218,34 @@ def main():
         st.write("### Breakdown by Selected Variables")
         st.dataframe(grouped_data, use_container_width=True)
 
-        # **📌 Additional breakdowns for each selected variable**
-        st.write("### Individual Variable Breakdown")
-
-        for var in selected_vars:
-            st.divider()
-            st.write(f"#### Breakdown by {var}")
-
-            single_var_grouped = filtered_df.groupby(var).agg({
-                "Clicks": "sum", "Impressions": "sum", "Cost": "sum",
-                "3 Sec Views": "sum", "Thruplays": "sum", "Leads": "sum"
-            }).reset_index()
-
-            # Generate calculated columns
-            single_var_grouped["CTR"] = (single_var_grouped["Clicks"] / single_var_grouped["Impressions"]).apply(format_percentage)
-            single_var_grouped["CPC"] = (single_var_grouped["Cost"] / single_var_grouped["Clicks"]).apply(format_dollar)
-            single_var_grouped["CPM"] = ((single_var_grouped["Cost"] / single_var_grouped["Impressions"]) * 1000).apply(format_dollar)
-            single_var_grouped["3 Sec View Rate"] = (single_var_grouped["3 Sec Views"] / single_var_grouped["Impressions"]).apply(format_percentage)
-            single_var_grouped["Vid Complete Rate"] = (single_var_grouped["Thruplays"] / single_var_grouped["Impressions"]).apply(format_percentage)
-            single_var_grouped["CPL"] = (single_var_grouped["Cost"] / single_var_grouped["Leads"]).apply(format_dollar)
-            single_var_grouped["CVR (Click)"] = (single_var_grouped["Leads"] / single_var_grouped["Clicks"]).apply(format_percentage)
-
-            # Organize column order
-            single_var_grouped = single_var_grouped[[var] + metric_order]
-
-            st.dataframe(single_var_grouped, use_container_width=True)
-
     else:
         st.write("Please select at least one variable to break down by.")
+
+    # **📌 Additional breakdowns for all categorical variables**
+    st.write("### All Variable Breakdowns")
+
+    for var in all_categorical_vars:
+        st.divider()
+        st.write(f"#### Breakdown by {var}")
+
+        single_var_grouped = filtered_df.groupby(var).agg({
+            "Clicks": "sum", "Impressions": "sum", "Cost": "sum",
+            "3 Sec Views": "sum", "Thruplays": "sum", "Leads": "sum"
+        }).reset_index()
+
+        # Generate calculated columns
+        single_var_grouped["CTR"] = (single_var_grouped["Clicks"] / single_var_grouped["Impressions"]).apply(format_percentage)
+        single_var_grouped["CPC"] = (single_var_grouped["Cost"] / single_var_grouped["Clicks"]).apply(format_dollar)
+        single_var_grouped["CPM"] = ((single_var_grouped["Cost"] / single_var_grouped["Impressions"]) * 1000).apply(format_dollar)
+        single_var_grouped["3 Sec View Rate"] = (single_var_grouped["3 Sec Views"] / single_var_grouped["Impressions"]).apply(format_percentage)
+        single_var_grouped["Vid Complete Rate"] = (single_var_grouped["Thruplays"] / single_var_grouped["Impressions"]).apply(format_percentage)
+        single_var_grouped["CPL"] = (single_var_grouped["Cost"] / single_var_grouped["Leads"]).apply(format_dollar)
+        single_var_grouped["CVR (Click)"] = (single_var_grouped["Leads"] / single_var_grouped["Clicks"]).apply(format_percentage)
+
+        # Organize column order
+        single_var_grouped = single_var_grouped[[var] + metric_order]
+
+        st.dataframe(single_var_grouped, use_container_width=True)
 
     st.divider()
 
