@@ -119,26 +119,16 @@ def format_dollar(value):
 
 # Streamlit app
 def main():
-    st.title("Heliose Creative Report")
-
-    # Platform selection at the top of the dashboard
-    platform_selection = st.radio("Select Platform:", ["YouTube", "Meta"], index=1)
+    st.title("Winchoice Creative Report")
 
     st.divider()
 
-    # Load Data
+    # Load Meta data
     meta_data = load_meta_data()
     meta_ref_data, meta_camp_data = load_meta_gsheet_data()
-    youtube_data = load_youtube_data()
-    youtube_ref_data, youtube_camp_data = load_youtube_gsheet_data()
 
-    # Merge Data Based on Selected Platform
-    if platform_selection == "YouTube":
-        merged_data = pd.merge(youtube_data, youtube_ref_data, on="Ad Name", how="left")
-        merged_data = pd.merge(merged_data, youtube_camp_data, on="Campaign", how="left")
-    else:
-        merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
-        merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
+    merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
+    merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
 
     ### **Add Campaign Type filter**
     type_options = ["All"] + sorted(merged_data["Type"].dropna().astype(str).unique().tolist()) + ["Unmapped"]
@@ -163,20 +153,13 @@ def main():
     # **Apply date filtering**
     filtered_df = filter_data(merged_data, start_date, end_date)
 
-    # **Define categorical variables based on platform**
-    if platform_selection == "Meta":
-        all_categorical_vars = [
-            "Ad Name", "Batch", "Medium", "Hook", "Secondary Message",
-            "Primary Imagery Style", "Secondary Imagery Style", "Copy Style",
-            "Aesthetic", "Concept Description", "Video Duration",
-            "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"
-        ]
-    else:
-        all_categorical_vars = [
-            "Ad Name", "Batch", "Medium", "Hook", "Secondary Message",
-            "Primary Imagery Style", "Secondary Imagery Style", "Copy Style",
-            "Aesthetic", "Concept Description", "Video Duration", "Video Close Message"
-        ]
+    # **Define categorical variables**
+    all_categorical_vars = [
+        "Ad Name", "Batch", "Medium", "Hook", "Secondary Message",
+        "Primary Imagery Style", "Secondary Imagery Style", "Background Brightness",
+        "Copy Style", "Aesthetic", "Concept", "Key Design Element",
+        "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"
+    ]
 
     # **User selects breakdown order first**
     st.write("### Select Breakdown Variables")
@@ -210,44 +193,57 @@ def main():
                     filtered_df = filtered_df[filtered_df[var].isin(selected_values)]
 
         # **Group data dynamically based on selection**
-        if platform_selection == "Meta":
-            metric_cols = ["Clicks", "Impressions", "Cost", "3 Sec Views", "Thruplays", "Leads"]
-        else:
-            metric_cols = ["Clicks", "Impressions", "Cost", "Views", "Conversions"]
-
-        grouped_data = filtered_df.groupby(selected_vars).agg({col: "sum" for col in metric_cols}).reset_index()
+        grouped_data = filtered_df.groupby(selected_vars).agg({
+            "Clicks": "sum", "Impressions": "sum", "Cost": "sum",
+            "3 Sec Views": "sum", "Thruplays": "sum", "Leads": "sum"
+        }).reset_index()
 
         # **Generate calculated metrics**
-        if platform_selection == "Meta":
-            grouped_data["CTR"] = (grouped_data["Clicks"] / grouped_data["Impressions"]).apply(format_percentage)
-            grouped_data["CPC"] = (grouped_data["Cost"] / grouped_data["Clicks"]).apply(format_dollar)
-            grouped_data["CPM"] = ((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000).apply(format_dollar)
-            grouped_data["3 Sec View Rate"] = (grouped_data["3 Sec Views"] / grouped_data["Impressions"]).apply(format_percentage)
-            grouped_data["Vid Complete Rate"] = (grouped_data["Thruplays"] / grouped_data["Impressions"]).apply(format_percentage)
-            grouped_data["CPL"] = (grouped_data["Cost"] / grouped_data["Leads"]).apply(format_dollar)
-            grouped_data["CVR (Click)"] = (grouped_data["Leads"] / grouped_data["Clicks"]).apply(format_percentage)
-            grouped_data["Cost"] = grouped_data["Cost"].apply(format_dollar)
+        grouped_data["CTR"] = (grouped_data["Clicks"] / grouped_data["Impressions"]).apply(format_percentage)
+        grouped_data["CPC"] = (grouped_data["Cost"] / grouped_data["Clicks"]).apply(format_dollar)
+        grouped_data["CPM"] = ((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000).apply(format_dollar)
+        grouped_data["3 Sec View Rate"] = (grouped_data["3 Sec Views"] / grouped_data["Impressions"]).apply(format_percentage)
+        grouped_data["Vid Complete Rate"] = (grouped_data["Thruplays"] / grouped_data["Impressions"]).apply(format_percentage)
+        grouped_data["CPL"] = (grouped_data["Cost"] / grouped_data["Leads"]).apply(format_dollar)
+        grouped_data["CVR (Click)"] = (grouped_data["Leads"] / grouped_data["Clicks"]).apply(format_percentage)
 
-            metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
-                            "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
-                            "Leads", "CPL", "CVR (Click)"]
-        else:
-            grouped_data["CTR"] = (grouped_data["Clicks"] / grouped_data["Impressions"]).apply(format_percentage)
-            grouped_data["CPC"] = (grouped_data["Cost"] / grouped_data["Clicks"]).apply(format_dollar)
-            grouped_data["CPM"] = ((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000).apply(format_dollar)
-            grouped_data["View Rate"] = (grouped_data["Views"] / grouped_data["Impressions"]).apply(format_percentage)
-            grouped_data["CPA"] = (grouped_data["Cost"] / grouped_data["Conversions"]).apply(format_dollar)
-            grouped_data["CVR (Click)"] = (grouped_data["Conversions"] / grouped_data["Clicks"]).apply(format_percentage)
-            grouped_data["Cost"] = grouped_data["Cost"].apply(format_dollar)
-
-            metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
-                            "Views", "View Rate", "Conversions", "CPA", "CVR (Click)"]
-
+        # **Define column order**
+        metric_order = [
+            "Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
+            "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
+            "Leads", "CPL", "CVR (Click)"
+        ]
         grouped_data = grouped_data[selected_vars + metric_order]
 
-        # **Display final results**
+        # **Display main results**
         st.write("### Breakdown by Selected Variables")
         st.dataframe(grouped_data, use_container_width=True)
+
+        # **📌 Additional breakdowns for each selected variable**
+        st.write("### Individual Variable Breakdown")
+
+        for var in selected_vars:
+            st.divider()
+            st.write(f"#### Breakdown by {var}")
+
+            single_var_grouped = filtered_df.groupby(var).agg({
+                "Clicks": "sum", "Impressions": "sum", "Cost": "sum",
+                "3 Sec Views": "sum", "Thruplays": "sum", "Leads": "sum"
+            }).reset_index()
+
+            # Generate calculated columns
+            single_var_grouped["CTR"] = (single_var_grouped["Clicks"] / single_var_grouped["Impressions"]).apply(format_percentage)
+            single_var_grouped["CPC"] = (single_var_grouped["Cost"] / single_var_grouped["Clicks"]).apply(format_dollar)
+            single_var_grouped["CPM"] = ((single_var_grouped["Cost"] / single_var_grouped["Impressions"]) * 1000).apply(format_dollar)
+            single_var_grouped["3 Sec View Rate"] = (single_var_grouped["3 Sec Views"] / single_var_grouped["Impressions"]).apply(format_percentage)
+            single_var_grouped["Vid Complete Rate"] = (single_var_grouped["Thruplays"] / single_var_grouped["Impressions"]).apply(format_percentage)
+            single_var_grouped["CPL"] = (single_var_grouped["Cost"] / single_var_grouped["Leads"]).apply(format_dollar)
+            single_var_grouped["CVR (Click)"] = (single_var_grouped["Leads"] / single_var_grouped["Clicks"]).apply(format_percentage)
+
+            # Organize column order
+            single_var_grouped = single_var_grouped[[var] + metric_order]
+
+            st.dataframe(single_var_grouped, use_container_width=True)
 
     else:
         st.write("Please select at least one variable to break down by.")
@@ -256,4 +252,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
