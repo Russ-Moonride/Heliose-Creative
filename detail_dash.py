@@ -226,6 +226,7 @@ def main():
             grouped_data["Vid Complete Rate"] = (grouped_data["Thruplays"] / grouped_data["Impressions"]).apply(format_percentage)
             grouped_data["CPL"] = (grouped_data["Cost"] / grouped_data["Leads"]).apply(format_dollar)
             grouped_data["CVR (Click)"] = (grouped_data["Leads"] / grouped_data["Clicks"]).apply(format_percentage)
+            grouped_data["Cost"] = grouped_data["Cost"].apply(format_dollar)
 
             metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
                             "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
@@ -237,6 +238,7 @@ def main():
             grouped_data["View Rate"] = (grouped_data["Views"] / grouped_data["Impressions"]).apply(format_percentage)
             grouped_data["CPA"] = (grouped_data["Cost"] / grouped_data["Conversions"]).apply(format_dollar)
             grouped_data["CVR (Click)"] = (grouped_data["Conversions"] / grouped_data["Clicks"]).apply(format_percentage)
+            grouped_data["Cost"] = grouped_data["Cost"].apply(format_dollar)
 
             metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
                             "Views", "View Rate", "Conversions", "CPA", "CVR (Click)"]
