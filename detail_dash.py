@@ -116,7 +116,6 @@ def format_dollar(value):
         return "N/A"
     return f"${value:,.2f}"  # Converts 1234.56 to '$1,234.56'
 
-
 # Streamlit app
 def main():
     st.title("Heliose Creative Report")
@@ -126,34 +125,29 @@ def main():
 
     st.divider()
 
-    # Load Meta data
+    # Load Data
     meta_data = load_meta_data()
     meta_ref_data, meta_camp_data = load_meta_gsheet_data()
-
-    # Load BigQuery data
     youtube_data = load_youtube_data()
     youtube_ref_data, youtube_camp_data = load_youtube_gsheet_data()
 
+    # Merge Data Based on Selected Platform
     if platform_selection == "YouTube":
-        merged_data = pd.merge(youtube_data, youtube_ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
-        merged_data = pd.merge(merged_data, youtube_camp_data, on="Campaign", how="left")  # 'left' keeps all BigQuery data
+        merged_data = pd.merge(youtube_data, youtube_ref_data, on="Ad Name", how="left")
+        merged_data = pd.merge(merged_data, youtube_camp_data, on="Campaign", how="left")
     else:
-        merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")  # 'left' keeps all BigQuery data
-        merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")  # 'left' keeps all BigQuery data
+        merged_data = pd.merge(meta_data, meta_ref_data, on="Ad Name", how="left")
+        merged_data = pd.merge(merged_data, meta_camp_data, on="Campaign Name", how="left")
 
     ### Add Campaign Type filter
-    # Get unique values in "Type" column, including "All" and "Unmapped" for NaN values
-    type_options = ["All"] + sorted(merged_data["Type"].dropna().unique().tolist()) + ["Unmapped"]
-    
-    # User selection for "Type"
+    type_options = ["All"] + sorted(merged_data["Type"].dropna().astype(str).unique().tolist()) + ["Unmapped"]
     selected_type = st.selectbox("Select Campaign Type:", type_options, index=0)
-    
-    # Apply filter if "All" is not selected
+
     if selected_type == "Unmapped":
-        merged_data = merged_data[merged_data["Type"].isna()]  # Filter for NaN values
+        merged_data = merged_data[merged_data["Type"].isna()]
     elif selected_type != "All":
-        merged_data = merged_data[merged_data["Type"] == selected_type]  # Filter for selected type
-    
+        merged_data = merged_data[merged_data["Type"] == selected_type]
+
     # Date filters
     col1, col2 = st.columns(2)
     with col1:
@@ -161,81 +155,104 @@ def main():
     with col2:
         end_date = st.date_input("End Date", datetime.today())
 
-    # Ensure valid date selection
     if start_date > end_date:
         st.error("End date must be after start date.")
         return
 
-    # Filter the loaded data
+    # Apply date filtering
     filtered_df = filter_data(merged_data, start_date, end_date)
 
+    # Define Categorical Variables Based on Platform
     if platform_selection == "Meta":
-        # Display filtered data
-        st.write("### Meta Creative Detail Breakdown")
-        # List of categorical variables to choose from
-        categorical_vars = ["Ad Name", "Batch", "Medium", "Hook", "Secondary Message", "Primary Imagery Style", "Secondary Imagery Style", "Copy Style", "Aesthetic", "Concept Description", "Video Duration", "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"]
-        
-        # User selects the breakdown order
-        selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Hook"])
-        
-        if selected_vars:
-            # Group data dynamically based on selection
-            grouped_data = filtered_df.groupby(selected_vars).agg({"Clicks": "sum", "Impressions": "sum", "Cost" : "sum", "3 Sec Views" : "sum", "Thruplays" : "sum", "Leads" : "sum"}).reset_index()
-    
-            # Make the columns we need
-            grouped_data["CTR"] = round(grouped_data["Clicks"]/grouped_data["Impressions"], 4).apply(format_percentage)
-            grouped_data["CPC"] = round(grouped_data["Cost"] / grouped_data["Clicks"], 2).apply(format_dollar)
-            grouped_data["CPM"] = round((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000, 2).apply(format_dollar)
-            grouped_data["3 Sec View Rate"] = round(grouped_data["3 Sec Views"] / grouped_data["Impressions"], 2).apply(format_percentage)
-            grouped_data["Vid Complete Rate"] = round(grouped_data["Thruplays"] / grouped_data["Impressions"], 2).apply(format_percentage)
-            grouped_data["CPL"] = round(grouped_data["Cost"] / grouped_data["Leads"], 2).apply(format_dollar)
-            grouped_data["CVR (Click)"] = round(grouped_data["Leads"] / grouped_data["Clicks"], 2).apply(format_percentage)
-    
-            # Organize cols
-            metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM", "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate", "Leads", "CPL", "CVR (Click)"]
-            grouped_data = grouped_data[selected_vars + metric_order]
-            
-            # Display results
-            st.write("### Breakdown by Selected Variables")
-            st.dataframe(grouped_data, use_container_width=True)
-    
+        categorical_vars = [
+            "Ad Name", "Batch", "Medium", "Hook", "Secondary Message",
+            "Primary Imagery Style", "Secondary Imagery Style", "Copy Style",
+            "Aesthetic", "Concept Description", "Video Duration",
+            "Video Audio: Voice Over", "Video Audio: BG Music", "Video Close Message"
+        ]
+    else:
+        categorical_vars = [
+            "Ad Name", "Batch", "Medium", "Hook", "Secondary Message",
+            "Primary Imagery Style", "Secondary Imagery Style", "Copy Style",
+            "Aesthetic", "Concept Description", "Video Duration", "Video Close Message"
+        ]
+
+    # **📌 Multi-select filters for categorical variables**
+    st.write("### Filter Data")
+
+    # Dynamically generate the required number of rows
+    num_columns = 5
+    num_rows = -(-len(categorical_vars) // num_columns)  # Ceiling division
+
+    # Create dynamic filter layout
+    rows = [st.columns(num_columns) for _ in range(num_rows)]
+    filter_values = {}
+
+    for i, var in enumerate(categorical_vars):
+        row_idx = i // num_columns
+        col_idx = i % num_columns
+        col = rows[row_idx][col_idx]
+
+        # Get unique values including "All" and "Unmapped"
+        unique_values = ["All"] + sorted(filtered_df[var].dropna().astype(str).unique().tolist()) + ["Unmapped"]
+        filter_values[var] = col.multiselect(f"Filter by {var}", unique_values, default=["All"])
+
+    # Apply filters dynamically
+    for var, selected_values in filter_values.items():
+        if "All" not in selected_values:
+            if "Unmapped" in selected_values:
+                filtered_df = filtered_df[filtered_df[var].isna() | filtered_df[var].isin(selected_values)]
+            else:
+                filtered_df = filtered_df[filtered_df[var].isin(selected_values)]
+
+    # **User selects breakdown order**
+    st.write("### Select Breakdown Variables")
+    selected_vars = st.multiselect("Breakdown order:", categorical_vars, default=["Hook"])
+
+    if selected_vars:
+        # **Group data dynamically based on selection**
+        if platform_selection == "Meta":
+            metric_cols = ["Clicks", "Impressions", "Cost", "3 Sec Views", "Thruplays", "Leads"]
         else:
-            st.write("Please select at least one variable to break down by.")
+            metric_cols = ["Clicks", "Impressions", "Cost", "Views", "Conversions"]
+
+        grouped_data = filtered_df.groupby(selected_vars).agg({col: "sum" for col in metric_cols}).reset_index()
+
+        # **Generate calculated metrics**
+        if platform_selection == "Meta":
+            grouped_data["CTR"] = (grouped_data["Clicks"] / grouped_data["Impressions"]).apply(format_percentage)
+            grouped_data["CPC"] = (grouped_data["Cost"] / grouped_data["Clicks"]).apply(format_dollar)
+            grouped_data["CPM"] = ((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000).apply(format_dollar)
+            grouped_data["3 Sec View Rate"] = (grouped_data["3 Sec Views"] / grouped_data["Impressions"]).apply(format_percentage)
+            grouped_data["Vid Complete Rate"] = (grouped_data["Thruplays"] / grouped_data["Impressions"]).apply(format_percentage)
+            grouped_data["CPL"] = (grouped_data["Cost"] / grouped_data["Leads"]).apply(format_dollar)
+            grouped_data["CVR (Click)"] = (grouped_data["Leads"] / grouped_data["Clicks"]).apply(format_percentage)
+
+            metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
+                            "3 Sec Views", "3 Sec View Rate", "Thruplays", "Vid Complete Rate",
+                            "Leads", "CPL", "CVR (Click)"]
+        else:
+            grouped_data["CTR"] = (grouped_data["Clicks"] / grouped_data["Impressions"]).apply(format_percentage)
+            grouped_data["CPC"] = (grouped_data["Cost"] / grouped_data["Clicks"]).apply(format_dollar)
+            grouped_data["CPM"] = ((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000).apply(format_dollar)
+            grouped_data["View Rate"] = (grouped_data["Views"] / grouped_data["Impressions"]).apply(format_percentage)
+            grouped_data["CPA"] = (grouped_data["Cost"] / grouped_data["Conversions"]).apply(format_dollar)
+            grouped_data["CVR (Click)"] = (grouped_data["Conversions"] / grouped_data["Clicks"]).apply(format_percentage)
+
+            metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM",
+                            "Views", "View Rate", "Conversions", "CPA", "CVR (Click)"]
+
+        grouped_data = grouped_data[selected_vars + metric_order]
+
+        # **Display final results**
+        st.write("### Breakdown by Selected Variables")
+        st.dataframe(grouped_data, use_container_width=True)
 
     else:
-        # Display filtered data
-        st.write("### YouTube Creative Detail Breakdown")
-        # List of categorical variables to choose from
-        categorical_vars = ["Ad Name", "Batch", "Medium", "Hook", "Secondary Message", "Primary Imagery Style", "Secondary Imagery Style", "Copy Style", "Aesthetic", "Concept Description", "Video Duration", "Video Close Message"]
-        
-        # User selects the breakdown order
-        selected_vars = st.multiselect("Select breakdown order:", categorical_vars, default=["Hook"])
-        
-        if selected_vars:
-            # Group data dynamically based on selection
-            grouped_data = filtered_df.groupby(selected_vars).agg({"Clicks": "sum", "Impressions": "sum", "Cost" : "sum", "Views" : "sum", "Conversions" : "sum"}).reset_index()
-    
-            # Make the columns we need
-            grouped_data["CTR"] = round(grouped_data["Clicks"]/grouped_data["Impressions"], 4).apply(format_percentage)
-            grouped_data["CPC"] = round(grouped_data["Cost"] / grouped_data["Clicks"], 2).apply(format_dollar)
-            grouped_data["CPM"] = round((grouped_data["Cost"] / grouped_data["Impressions"]) * 1000, 2).apply(format_dollar)
-            grouped_data["View Rate"] = round(grouped_data["Views"] / grouped_data["Impressions"], 2).apply(format_percentage)
-            grouped_data["CPA"] = round(grouped_data["Cost"] / grouped_data["Conversions"], 2).apply(format_dollar)
-            grouped_data["CVR (Click)"] = round(grouped_data["Conversions"] / grouped_data["Clicks"], 2).apply(format_percentage)
-    
-            
-            # Organize cols
-            metric_order = ["Impressions", "Clicks", "CTR", "Cost", "CPC", "CPM", "Views", "View Rate", "Conversions", "CPA", "CVR (Click)"]
-            grouped_data = grouped_data[selected_vars + metric_order]
-    
-            # Display results
-            st.write("### Breakdown by Selected Variables")
-            st.dataframe(grouped_data, use_container_width=True)
-    
-        else:
-            st.write("Please select at least one variable to break down by.")
+        st.write("Please select at least one variable to break down by.")
 
     st.divider()
 
 if __name__ == "__main__":
     main()
+
