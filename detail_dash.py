@@ -128,8 +128,12 @@ def main():
     # Load Data
     meta_data = load_meta_data()
     meta_ref_data, meta_camp_data = load_meta_gsheet_data()
+    st.write(meta_ref_data)
+    st.write(meta_camp_data)
     youtube_data = load_youtube_data()
     youtube_ref_data, youtube_camp_data = load_youtube_gsheet_data()
+    st.write(youtube_ref_data)
+    st.write(youtube_camp_data)
 
     # Merge Data Based on Selected Platform
     if platform_selection == "YouTube":
